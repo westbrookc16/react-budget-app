@@ -2,10 +2,12 @@ import React, { useState, useEffect, useContext } from 'react';
 import FirebaseContext from '../firebase/firebase';
 import UserContext from '../firebase/UserContext';
 import BudgetForm from './BudgetForm';
+import Message from '../utils/Modal';
 const BudgetContainer = () => {
 	const user = useContext(UserContext);
 	const firebase = useContext(FirebaseContext);
 	const [budget, setBudget] = useState({ year: '2019', month: '5', income: 0 });
+	const [budgetadded, setBudgetAdded] = useState(0);
 	//gets budget if year or month changes
 	const { year, month } = budget;
 	useEffect(() => {
@@ -16,7 +18,6 @@ const BudgetContainer = () => {
 			.then(doc => {
 				if (doc.exists) {
 					setBudget({ ...doc.data(), id: doc.id });
-					
 				} else {
 					setBudget(b => {
 						return { ...b, income: 0, id: '' };
@@ -43,7 +44,7 @@ const BudgetContainer = () => {
 						.then(a => {});
 				});
 			});
-		alert('Your budget has been saved.');
+		setBudgetAdded(true);
 		setBudget({ ...budget, id: `${user.uid}${year}${month}` });
 	};
 	//category code
@@ -93,14 +94,25 @@ const BudgetContainer = () => {
 			.catch(e => {});
 	};
 	return (
-		<BudgetForm
-			budget={budget}
-			handleChange={handleChange}
-			saveBudget={saveBudget}
-			addCategory={addCategory}
-			handleCategoryChange={handleCategoryChange}
-			categories={categories}
-		/>
+		<div>
+			<BudgetForm
+				budget={budget}
+				handleChange={handleChange}
+				saveBudget={saveBudget}
+				addCategory={addCategory}
+				handleCategoryChange={handleCategoryChange}
+				categories={categories}
+			/>
+
+			<Message
+				visible={budgetadded}
+				OKFunction={() => {
+					setBudgetAdded(false);
+				}}
+				title="Budget added Successfully"
+				message="Your budget was added successfully."
+			/>
+		</div>
 	);
 };
 export default BudgetContainer;
